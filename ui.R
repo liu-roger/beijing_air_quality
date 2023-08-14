@@ -5,7 +5,7 @@
 # Find out more about building applications with Shiny here:
 #
 #    http://shiny.rstudio.com/
-#
+# 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
 library(shiny)
 library(leaflet)
 library(maps)
@@ -53,6 +53,8 @@ all_stations = all_stations %>%
 view(all_stations)
 length(all_stations$hour)
 all_stations$minute = vector('numeric',length(all_stations$hour))
+all_stations = all_stations[,c("No","date","hour","minute","PM2.5","PM10","SO2","NO2","CO","O3","TEMP","PRES","DEWP","RAIN","wd","WSPM","station")]
+all_stations$minute = as.charcter(all_stations$minute)
 
 # all_stations$minute = 
 # Define UI for application that draws a histogram
@@ -71,7 +73,7 @@ navbarPage(
             'Particulate Selection',
             selectizeInput(inputId = "particulate_selection_heatmap",
               label = "Particulate Selection",
-              choices = colnames(all_stations)[c(4:13)]
+              choices = colnames(all_stations)[c(5:14)]
             )
           ),
           column(6,
