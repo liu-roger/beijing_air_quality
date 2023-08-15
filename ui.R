@@ -11,6 +11,7 @@ library(leaflet)
 library(maps)
 library(dplyr)
 library(tidyverse)
+library(ggplot2)
 
 #data source
 # https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data
@@ -47,16 +48,43 @@ all_stations = rbind(
   wanliu,
   wanshouxigong
   )
-c()
 all_stations = all_stations %>%
-  unite("date",year:day,sep = '-')
-view(all_stations)
-length(all_stations$hour)
-all_stations$minute = vector('numeric',length(all_stations$hour))
+  unite("date",year:day,remove=FALSE, sep = '-')
+# view(all_stations)
+# length(all_stations$hour)
+all_stations$minute = rep('00',times = length(all_stations$hour))
 all_stations = all_stations[,c("No","date","hour","minute","PM2.5","PM10","SO2","NO2","CO","O3","TEMP","PRES","DEWP","RAIN","wd","WSPM","station")]
-all_stations$minute = as.charcter(all_stations$minute)
+all_stations = all_stations %>%
+  unite("time",c(hour,minute),remove=FALSE, sep = ':')
 
-# all_stations$minute = 
+all_stations = all_stations %>%
+  unite("dateTime",c(date,time),remove = FALSE, sep = ' ')
+
+all_stations$dateTime = strptime(all_stations$dateTime,format("%Y-%m-%d %H:%M"))
+# view(all_stations)
+
+beijing_map = leaflet() %>%
+  addTiles() %>%
+  setView(lng = 116.383331,lat = 39.916668 ,zoom = 9) %>%
+  addMarkers(lng = 116.383331,lat = 39.91666, popup = "Beijing City, China") %>%
+  addMarkers(lng = 116.3937,lat = 39.9858, popup = "Aoti ZhongXin") %>%
+  addMarkers(lng = 116.23471,lat = 40.21612 , popup = "Changping") %>%
+  addMarkers(lng = 116.26667,lat = 40.26667, popup = "Dingling") %>%
+  addMarkers(lng = 116.4341,lat = 39.9320, popup = "Dongsi") %>%
+  addMarkers(lng = 116.3609186,lat = 39.9353679, popup = "Guanyuan") %>%
+  addMarkers(lng = 116.179722,lat = 39.913611, popup = "Gucheng") %>%
+  addMarkers(lng = 116.6878,lat = 40.3971, popup = "Huairou") %>%
+  addMarkers(lng = 116.4594991,lat = 39.9425493, popup = "Nongzhanguan") %>%
+  addMarkers(lng = 116.8665,lat = 40.0577, popup = "Shunyi") %>%
+  addMarkers(lng = 116.4066,lat = 39.8822, popup = "Tiantan") %>%
+  addMarkers(lng = 116.2576,lat = 39.9977, popup = "Wanliu") %>%
+  addMarkers(lng = 116.4066,lat = 39.8822, popup = "Wanshouxigong") 
+  
+  
+  
+  
+
+
 # Define UI for application that draws a histogram
 navbarPage(
   h4("Beijing Air Quality"),
@@ -66,14 +94,14 @@ navbarPage(
     fluidRow(style = "border: 4px double red;",
       column(12,
         'centered beijing icon',
-        img(src='img/beijing_icon.jpeg', width='50%'),
+        img(src='img/beijing_icon.jpeg', width='50%', align='middle'),
         
         fluidRow(style = "border: 4px double red;",
           column(6,
             'Particulate Selection',
             selectizeInput(inputId = "particulate_selection_heatmap",
               label = "Particulate Selection",
-              choices = colnames(all_stations)[c(5:14)]
+              choices = colnames(all_stations)[c(7:16)]
             )
           ),
           column(6,
@@ -87,11 +115,8 @@ navbarPage(
       ),
       fluidRow(style = "border: 4px double red;",
         column(12,
-          'HEAT MAP',
-          dateInput('date',
-            label = 'Date input: yyyy-mm-dd',
-            value = Sys.Date()
-          )
+          'Map of Beijing',
+          beijing_map
         )
       ),
       fluidRow(style = "border: 4px double red;",

@@ -8,6 +8,11 @@
 #
 
 library(shiny)
+library(leaflet)
+library(maps)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
