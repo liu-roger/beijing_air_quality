@@ -5,7 +5,7 @@
 # Find out more about building applications with Shiny here:
 #
 #    http://shiny.rstudio.com/
-# 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
+
 library(shiny)
 library(leaflet)
 library(maps)
