@@ -91,7 +91,8 @@ function(input, output, session) {
     all_stations[c(1,2,10:19,20,21)]
   })
   output$station_1_dt = DT::renderDataTable({
-    DT::datatable(all_stations[, c(input$line_graph_particulate_selection), drop = FALSE])
+    # all_stations = all_stations[c(1)]
+    DT::datatable(all_stations[, input$line_graph_particulate_selection, drop = FALSE])
     #all_stations[2,input$line_graph_particulate_selection]
   })
   output$station_2_dt = DT::renderDataTable({
@@ -117,5 +118,10 @@ function(input, output, session) {
       addMarkers(lng = 116.4066,lat = 39.8822, popup = "Wanshouxigong") 
   }
   )
-
+  # output$particulatesLineGraph = renderPlot(
+  #   all_stations %>%
+  #     filter(station = input$station_name1_line_graph) %>%
+  #     ggplot(aes(x=date, y=input$line_graph_particulate_selection))
+  # )
+    
 }
