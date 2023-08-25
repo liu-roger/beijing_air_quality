@@ -13,7 +13,7 @@ library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(DT)
-
+library(con2aqi)
 #data source
 # https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data
 # https://www.apple.com/startpage/
@@ -53,8 +53,10 @@ all_stations = all_stations %>%
   unite("date",year:day,remove=FALSE, sep = '-')
 # view(all_stations)
 # length(all_stations$hour)
+
 all_stations$minute = rep('00',times = length(all_stations$hour))
 all_stations = all_stations[,c("station","date","year","month",'day', "hour","minute","PM2.5","PM10","SO2","NO2","CO","O3","TEMP","PRES","DEWP","RAIN","wd","WSPM")]
+
 all_stations = all_stations %>%
   unite("time",c(hour,minute),remove=FALSE, sep = ':')
 
@@ -65,26 +67,8 @@ all_stations = all_stations %>%
 #all_stations$date = strptime(all_stations$date,format("%Y-%m-%d"))
 # view(all_stations)
 
-# beijing_map = leaflet() %>%
-#   addTiles() %>%
-#   setView(lng = 116.383331,lat = 39.916668 ,zoom = 9) %>%
-#   addMarkers(lng = 116.383331,lat = 39.91666, popup = "Beijing City, China") %>%
-#   addMarkers(lng = 116.3937,lat = 39.9858, popup = "Aoti ZhongXin") %>%
-#   addMarkers(lng = 116.23471,lat = 40.21612 , popup = "Changping") %>%
-#   addMarkers(lng = 116.26667,lat = 40.26667, popup = "Dingling") %>%
-#   addMarkers(lng = 116.4341,lat = 39.9320, popup = "Dongsi") %>%
-#   addMarkers(lng = 116.3609186,lat = 39.9353679, popup = "Guanyuan") %>%
-#   addMarkers(lng = 116.179722,lat = 39.913611, popup = "Gucheng") %>%
-#   addMarkers(lng = 116.6878,lat = 40.3971, popup = "Huairou") %>%
-#   addMarkers(lng = 116.4594991,lat = 39.9425493, popup = "Nongzhanguan") %>%
-#   addMarkers(lng = 116.8665,lat = 40.0577, popup = "Shunyi") %>%
-#   addMarkers(lng = 116.4066,lat = 39.8822, popup = "Tiantan") %>%
-#   addMarkers(lng = 116.2576,lat = 39.9977, popup = "Wanliu") %>%
-#   addMarkers(lng = 116.4066,lat = 39.8822, popup = "Wanshouxigong")
-  
-  
-  
-  
+
+
 
 
 # Define UI for application that draws a histogram
@@ -100,24 +84,28 @@ navbarPage(
         
         fluidRow(style = "border: 4px double red;",
           column(6,
-            'Particulate Selection',
-            selectizeInput(inputId = "particulate_selection_heatmap",
-              label = "Particulate Selection",
-              choices = colnames(all_stations)[c(10:19,21)]
+            # 'Particulate Selection',
+            dateRangeInput('date_range_heatmap_datatable',
+              label = 'Date range input for the Data Table: yyyy-mm-dd',
+              start = Sys.Date() - 2, end = Sys.Date() + 2
             )
           ),
           column(6,
-            'Date Range Input',
-            dateInput('date',
-              label = 'Date input: yyyy-mm-dd',
+            # 'Date Range Input',
+            dateInput('date_heatmap',
+              label = 'Date input for the heatmap: yyyy-mm-dd',
               value = Sys.Date()
-            )
+            ),
+            # dateRangeInput('date_range_heatmap_datatable',
+            #   label = 'Date range input for the Data Table: yyyy-mm-dd',
+            #   start = Sys.Date() - 2, end = Sys.Date() + 2
+            # )
           ),
         )
       ),
       fluidRow(style = "border: 4px double red;",
         column(12,
-          'Map of Beijing',
+          h4('Map of Beijing and Data Collection Stations'),
           leafletOutput('beijing_map')
         )
       ),
@@ -133,8 +121,8 @@ navbarPage(
   tabPanel(
     h4("Line Graphs"),
     fluidRow(style = "border: 4px double red;",
-      column(12,"centered beijing icon",
-        img(src='img/beijing_icon.jpeg', width='50%'),
+      column(12,h4("Beijing Air Quality Analysis"),
+        # img(src='img/beijing_icon.jpeg', width='50%'),
         fluidRow(style = "border: 4px double red;",
           column(6,
             selectizeInput(inputId = "station_name1_line_graph",
@@ -159,7 +147,8 @@ navbarPage(
             selectizeInput(inputId = "time_aggregation",
               label = "Time Frame",
               choices = colnames(all_stations)[c(4,5)]
-            )
+            ),
+            
           )
         ),
         fluidRow(style = "border: 4px double red;",
@@ -167,11 +156,16 @@ navbarPage(
             plotOutput('particulatesLineGraph'),
           
             fluidRow(
-              column(6, 'this is where the table1 is displayed',
+              column(5, verbatimTextOutput("station_1_name"),
                 DT::dataTableOutput('station_1_dt')
               ),
-              column(6, 'this is where the table2 is displayed',
+              column(5, verbatimTextOutput("station_2_name"),
                 DT::dataTableOutput('station_2_dt')
+              ),
+              column(2,
+                checkboxGroupInput("show_vars", "Particulates to Show:",
+                  names(all_stations[c(2,10:15)]), selected = names(all_stations[c(2,10:15)])
+                )
               )
             )
           )
