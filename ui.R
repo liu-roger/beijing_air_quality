@@ -18,7 +18,6 @@ library(con2aqi)
 # https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data
 # https://www.apple.com/startpage/
 
-all_stations = read_csv('all_stations.csv')
 
 # Define UI for application that draws a histogram
 navbarPage(

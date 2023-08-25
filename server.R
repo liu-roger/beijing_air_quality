@@ -20,10 +20,6 @@ library(DT)
 # https://www.apple.com/startpage/
 
 
-#loading datasets and joining them
-all_stations = read_csv('all_stations.csv')
-
-
 # Define server logic required to draw a histogram
 function(input, output, session) {
   output$heatmap_dt = DT::renderDataTable({
