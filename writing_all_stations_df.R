@@ -65,4 +65,4 @@ sapply(all_stations, function(x) sum(is.na(x)))
 
 
 is.data.frame(all_stations)
-write_csv(all_stations, "~/Documents/r_project/beijing_air_quality/all_stations.csv")
+write_csv(all_stations, "all_stations.csv")
