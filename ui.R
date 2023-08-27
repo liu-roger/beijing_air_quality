@@ -121,10 +121,6 @@ navbarPage(
         )
       )
     )
-  ),
-  tabPanel(
-    h4("teest")
-    
   )
 )
   

@@ -23,14 +23,31 @@ library(patchwork)
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
+  all_stations_reactive = reactive({
+    # Convert the input to a column name
+    selected_col <- as.name(input$line_graph_particulate_selection) 
+    
+    # Use !! to unquote the variable name
+    result <- all_stations %>%
+      filter(station == input$station_name1_line_graph | station == input$station_name2_line_graph) %>%
+      group_by(station, date) %>%
+      summarise(mean_particle = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
+    # Debug: Show the first few rows of the result
+    # print(head(result))
+    return(result)
+  })
+  
   output$heatmap_dt = DT::renderDataTable({
     all_stations[c(1,2,10:19,20,21)]
   })
   output$station_1_dt = DT::renderDataTable({
-    DT::datatable(all_stations[all_stations$station == input$station_name1_line_graph, input$show_vars, drop = FALSE])
+    # DT::datatable(all_stations[all_stations$station == input$station_name1_line_graph, input$show_vars, drop = FALSE])
+    DT::datatable(all_stations_reactive()[all_stations_reactive()$station==input$station_name1_line_graph,c(2,3)])
+    
   })
   output$station_2_dt = DT::renderDataTable({
-    DT::datatable(all_stations[all_stations$station == input$station_name2_line_graph, input$show_vars, drop = FALSE])
+    # DT::datatable(all_stations[all_stations$station == input$station_name2_line_graph, input$show_vars, drop = FALSE])
+    DT::datatable(all_stations_reactive()[all_stations_reactive()$station==input$station_name2_line_graph,c(2,3)])
   })
   
   output$beijing_map = renderLeaflet({
@@ -61,52 +78,14 @@ function(input, output, session) {
   # })
   # 
   
-  all_stations_reactive_station1 = reactive({
-    # Convert the input to a column name
-    selected_col <- as.name(input$line_graph_particulate_selection) 
-    
-    # Use !! to unquote the variable name
-    result <- all_stations %>%
-      filter(station == input$station_name1_line_graph | station == input$station_name2_line_graph) %>%
-      group_by(station, date) %>%
-      summarise(mean_particle = mean(!!selected_col, na.rm = TRUE)) 
-    # Debug: Show the first few rows of the result
-    # print(head(result))
-    return(result)
-  })
-  # all_stations_reactive_station2 = reactive({
-  #   # Convert the input to a column name
-  #   selected_col <- as.name(input$line_graph_particulate_selection) 
-  #   
-  #   # Use !! to unquote the variable name
-  #   result <- all_stations %>%
-  #     filter(station == input$station_name2_line_graph) %>%
-  #     group_by(date, station) %>%
-  #     summarise(mean_particle = mean(!!selected_col, na.rm = TRUE)) 
-  #   # Debug: Show the first few rows of the result
-  #   # print(head(result))
-  #   return(result)
-  # })
-  # 
-  # plot1 = reactive({plot1 = all_stations_reactive_station1() %>%
-  #   ggplot(aes(x=date, y= mean_particle)) + 
-  #     geom_line() +
-  #     labs(title = input$station_name1_line_graph, x = "Date", y = input$line_graph_particulate_selection)
-  # })
-  # 
-  # plot2 = reactive({all_stations_reactive_station2() %>%
-  #   ggplot(aes(x=date, y= mean_particle)) + 
-  #     geom_line() + 
-  #     labs(title = input$station_name2_line_graph, x = "Date", y = input$line_graph_particulate_selection)
-  # })
+  
   
   output$particulatesLineGraph = renderPlot(
-    all_stations_reactive_station1() %>%
+    all_stations_reactive() %>%
       ggplot(aes(x=date, y= mean_particle)) + 
         geom_line(aes(color=station)) +
-        labs(title = input$station_name1_line_graph, x = "Date", y = input$line_graph_particulate_selection)+
+        labs(x = "Date", y = input$line_graph_particulate_selection) +
         facet_grid(rows = vars(station))
-  
   )
   
   output$station_1_name  <- renderText({
