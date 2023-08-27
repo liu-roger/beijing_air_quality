@@ -51,12 +51,32 @@ function(input, output, session) {
       addMarkers(lng = 116.4066,lat = 39.8822, popup = "Wanshouxigong") 
   }
   )
-  output$particulatesLineGraph = renderPlot(
-    all_stations %>%
+  # all_stations_reactive = reactive({
+  #   all_stations %>%
+  #     select(station,input$line_graph_particulate_selection)
+  #     filter(station == input$station_name1_line_graph) %>%
+  #     group_by(date) %>%
+  #     summarise(mean_particle = mean(input$line_graph_particulate_selection))
+  # })
+  # 
+  
+  all_stations_reactive = reactive({
+    # Convert the input to a column name
+    selected_col <- as.name(input$line_graph_particulate_selection) 
+    
+    # Use !! to unquote the variable name
+    result <- all_stations %>%
       filter(station == input$station_name1_line_graph) %>%
-      group_by(date) %>%
-      summarise(mean_particle = mean(input$line_graph_particulate_selection)) %>%
-      ggplot(aes(x=date, y=mean_particle)) + geom_line()
+      group_by(date, station) %>%
+      summarise(mean_particle = mean(!!selected_col, na.rm = TRUE)) 
+    # Debug: Show the first few rows of the result
+    # print(head(result))
+    return(result)
+  })
+  
+  output$particulatesLineGraph = renderPlot(
+    all_stations_reactive() %>%
+      ggplot(aes(x=date, y= mean_particle)) + geom_line()
   )
   output$station_1_name  <- renderText({
     paste("Station Name:", as.character(input$station_name1_line_graph))
