@@ -59,7 +59,9 @@ all_stations$date = as.Date(all_stations$date,format("%Y-%m-%d"))
 # view(all_stations)
 
 all_stations = all_stations %>%
-  fill(PM2.5,PM10,SO2,NO2,CO,O3,TEMP,PRES,DEWP,RAIN,wd,WSPM)
+  fill(PM2.5,PM10,SO2,NO2,CO,O3,TEMP,PRES,DEWP,RAIN,wd,WSPM, .direction = 'downup')
+
+
 sapply(all_stations, function(x) sum(is.na(x)))
 
 
