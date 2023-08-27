@@ -14,6 +14,7 @@ library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(DT)
+library(patchwork)
 
 #data source
 # https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data
@@ -60,24 +61,54 @@ function(input, output, session) {
   # })
   # 
   
-  all_stations_reactive = reactive({
+  all_stations_reactive_station1 = reactive({
     # Convert the input to a column name
     selected_col <- as.name(input$line_graph_particulate_selection) 
     
     # Use !! to unquote the variable name
     result <- all_stations %>%
-      filter(station == input$station_name1_line_graph) %>%
-      group_by(date, station) %>%
+      filter(station == input$station_name1_line_graph | station == input$station_name2_line_graph) %>%
+      group_by(station, date) %>%
       summarise(mean_particle = mean(!!selected_col, na.rm = TRUE)) 
     # Debug: Show the first few rows of the result
     # print(head(result))
     return(result)
   })
+  # all_stations_reactive_station2 = reactive({
+  #   # Convert the input to a column name
+  #   selected_col <- as.name(input$line_graph_particulate_selection) 
+  #   
+  #   # Use !! to unquote the variable name
+  #   result <- all_stations %>%
+  #     filter(station == input$station_name2_line_graph) %>%
+  #     group_by(date, station) %>%
+  #     summarise(mean_particle = mean(!!selected_col, na.rm = TRUE)) 
+  #   # Debug: Show the first few rows of the result
+  #   # print(head(result))
+  #   return(result)
+  # })
+  # 
+  # plot1 = reactive({plot1 = all_stations_reactive_station1() %>%
+  #   ggplot(aes(x=date, y= mean_particle)) + 
+  #     geom_line() +
+  #     labs(title = input$station_name1_line_graph, x = "Date", y = input$line_graph_particulate_selection)
+  # })
+  # 
+  # plot2 = reactive({all_stations_reactive_station2() %>%
+  #   ggplot(aes(x=date, y= mean_particle)) + 
+  #     geom_line() + 
+  #     labs(title = input$station_name2_line_graph, x = "Date", y = input$line_graph_particulate_selection)
+  # })
   
   output$particulatesLineGraph = renderPlot(
-    all_stations_reactive() %>%
-      ggplot(aes(x=date, y= mean_particle)) + geom_line()
+    all_stations_reactive_station1() %>%
+      ggplot(aes(x=date, y= mean_particle)) + 
+        geom_line(aes(color=station)) +
+        labs(title = input$station_name1_line_graph, x = "Date", y = input$line_graph_particulate_selection)+
+        facet_grid(rows = vars(station))
+  
   )
+  
   output$station_1_name  <- renderText({
     paste("Station Name:", as.character(input$station_name1_line_graph))
   })

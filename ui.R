@@ -80,7 +80,8 @@ navbarPage(
             
             selectizeInput(inputId = "station_name2_line_graph",
               label = "Second Station Name",
-              choices = unique(all_stations$station)
+              choices = unique(all_stations$station),
+              selected = unique(all_stations$station)[2]
             ),
             selectizeInput(inputId = "line_graph_particulate_selection",
               label = "Particulate Selection",
@@ -120,6 +121,10 @@ navbarPage(
         )
       )
     )
+  ),
+  tabPanel(
+    h4("teest")
+    
   )
 )
   
