@@ -29,7 +29,7 @@ function(input, output, session) {
     
     # Use !! to unquote the variable name
     result <- all_stations %>%
-      filter(station == input$station_name1_line_graph | station == input$station_name2_line_graph) %>%
+      filter((station == input$station_name1_line_graph | station == input$station_name2_line_graph)) %>%
       group_by(station, date) %>%
       summarise(mean_particle = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
     # Debug: Show the first few rows of the result
@@ -41,12 +41,10 @@ function(input, output, session) {
     all_stations[c(1,2,10:19,20,21)]
   })
   output$station_1_dt = DT::renderDataTable({
-    # DT::datatable(all_stations[all_stations$station == input$station_name1_line_graph, input$show_vars, drop = FALSE])
     DT::datatable(all_stations_reactive()[all_stations_reactive()$station==input$station_name1_line_graph,c(2,3)])
     
   })
   output$station_2_dt = DT::renderDataTable({
-    # DT::datatable(all_stations[all_stations$station == input$station_name2_line_graph, input$show_vars, drop = FALSE])
     DT::datatable(all_stations_reactive()[all_stations_reactive()$station==input$station_name2_line_graph,c(2,3)])
   })
   
@@ -89,11 +87,12 @@ function(input, output, session) {
   )
   
   output$station_1_name  <- renderText({
-    paste("Station Name:", as.character(input$station_name1_line_graph))
+    paste("Station Name:", as.character(input$station_name1_line_graph), '- Average',as.character(input$line_graph_particulate_selection))
   })
   
   output$station_2_name  <- renderText({
-    paste("Station Name:", as.character(input$station_name2_line_graph))
+    paste("Station Name:", as.character(input$station_name2_line_graph), '- Average',as.character(input$line_graph_particulate_selection))
+    
   })
     
 }
