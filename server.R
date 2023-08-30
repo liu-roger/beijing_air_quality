@@ -91,11 +91,11 @@ function(input, output, session) {
   )
   
   output$station_1_name  <- renderText({
-    paste("Station Name:", as.character(input$station_name1_line_graph), '- Average',as.character(input$line_graph_particulate_selection))
+    paste("Station Name:", as.character(input$station_name1_line_graph), as.character(input$stat_aggregation),as.character(input$line_graph_particulate_selection))
   })
   
   output$station_2_name  <- renderText({
-    paste("Station Name:", as.character(input$station_name2_line_graph), '- Average',as.character(input$line_graph_particulate_selection))
+    paste("Station Name:", as.character(input$station_name2_line_graph), as.character(input$stat_aggregation),as.character(input$line_graph_particulate_selection))
     
   })
     
