@@ -132,28 +132,28 @@ navbarPage(
           )
         )
       ),
-      # tabPanel('Maximum',
-      #   plotOutput('maxParticulatesLineGraph'),
-      #   fluidRow(
-      #     column(6, verbatimTextOutput("station_1_name_max"),
-      #            DT::dataTableOutput('station_1_dt_max')
-      #     ),
-      #     column(6, verbatimTextOutput("station_2_name_max"),
-      #            DT::dataTableOutput('station_2_dt_max')
-      #     )
-      #   )
-      # ),
-      # tabPanel('Minimum',
-      #   plotOutput('minParticulatesLineGraph'),
-      #   fluidRow(
-      #     column(6, verbatimTextOutput("station_1_name_max"),
-      #            DT::dataTableOutput('station_1_dt_max')
-      #     ),
-      #     column(6, verbatimTextOutput("station_2_name_max"),
-      #            DT::dataTableOutput('station_2_dt_max')
-      #     )
-      #   )
-      # )
+      tabPanel('Maximum',
+        plotOutput('maxParticulatesLineGraph'),
+        fluidRow(
+          column(6, verbatimTextOutput("station_1_name_max"),
+                 DT::dataTableOutput('station_1_dt_max')
+          ),
+          column(6, verbatimTextOutput("station_2_name_max"),
+                 DT::dataTableOutput('station_2_dt_max')
+          )
+        )
+      ),
+      tabPanel('Minimum',
+        plotOutput('minParticulatesLineGraph'),
+        fluidRow(
+          column(6, verbatimTextOutput("station_1_name_min"),
+                 DT::dataTableOutput('station_1_dt_min')
+          ),
+          column(6, verbatimTextOutput("station_2_name_min"),
+                 DT::dataTableOutput('station_2_dt_min')
+          )
+        )
+      )
     )
   )
 )
