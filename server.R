@@ -23,15 +23,19 @@ library(patchwork)
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
+  
   all_stations_reactive = reactive({
+    
     # Convert the input to a column name
     selected_col <- as.name(input$line_graph_particulate_selection) 
+    start_date = as.Date(input$dateRangeLineGraph[1])
+    end_date = as.Date(input$dateRangeLineGraph[2])
     
-    # Use !! to unquote the variable name
     result <- all_stations %>%
-      filter((station == input$station_name1_line_graph | station == input$station_name2_line_graph)) %>%
+      filter((station == input$station_name1_line_graph | station == input$station_name2_line_graph) & (date >= start_date & date <= end_date)) %>%
       group_by(station, date) %>%
-      summarise(mean_particle = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
+      summarise(mean_particle = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) # Use !! to unquote the variable name
+    
     # Debug: Show the first few rows of the result
     # print(head(result))
     return(result)

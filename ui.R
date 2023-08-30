@@ -76,7 +76,7 @@ navbarPage(
     h4("Line Graphs"),
     fluidRow(style = "border: 1px solid #E54B4B;",
       fluidRow(style = "border: 1px solid #E54B4B;",
-        column(6,
+        column(5,offset = 1,
           selectizeInput(inputId = "station_name1_line_graph",
             label = "First Station Name",
             choices = unique(all_stations$station)
@@ -92,21 +92,21 @@ navbarPage(
             choices = colnames(all_stations)[c(10:19,21)]
           ),
         ),
-        column(6,
+        column(5, offset = 1,
           dateRangeInput('dateRangeLineGraph',
             label = 'Date range input: yyyy-mm-dd',
             start = min(all_stations$date), end = max(all_stations$date),
             min =  min(all_stations$date), max = max(all_stations$date)
           ),
-          selectizeInput(inputId = "time_aggregation",
-            label = "Time Frame",
-            choices = colnames(all_stations)[c(4,5)]
+          selectizeInput(inputId = "stat_aggregation",
+            label = "Statistic to be seen:",
+            choices = c('Mean','Maximum', 'Minimum')
           ),
             
         )
       ),
       fluidRow(style = "border: 1px solid #E54B4B;",
-        column(12,"this is where the line graph is displayed",
+        column(12,("Line Graph for Comparison"),
           plotOutput('particulatesLineGraph'),
         
         fluidRow(
