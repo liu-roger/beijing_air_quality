@@ -24,7 +24,7 @@ library(patchwork)
 # Define server logic required to draw a histogram
 function(input, output, session) {
   
-  all_stations_reactive = reactive({
+  all_stations_reactive_mean = reactive({
     
     # Convert the input to a column name
     selected_col <- as.name(input$line_graph_particulate_selection) 
@@ -44,12 +44,12 @@ function(input, output, session) {
   output$heatmap_dt = DT::renderDataTable({
     all_stations[c(1,2,10:19,20,21)]
   })
-  output$station_1_dt = DT::renderDataTable({
-    DT::datatable(all_stations_reactive()[all_stations_reactive()$station==input$station_name1_line_graph,c(2,3)])
+  output$station_1_dt_mean = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name1_line_graph,c(2,3)])
     
   })
-  output$station_2_dt = DT::renderDataTable({
-    DT::datatable(all_stations_reactive()[all_stations_reactive()$station==input$station_name2_line_graph,c(2,3)])
+  output$station_2_dt_mean = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name2_line_graph,c(2,3)])
   })
   
   output$beijing_map = renderLeaflet({
@@ -82,8 +82,8 @@ function(input, output, session) {
   
   
   
-  output$particulatesLineGraph = renderPlot(
-    all_stations_reactive() %>%
+  output$meanParticulatesLineGraph = renderPlot(
+    all_stations_reactive_mean() %>%
       ggplot(aes(x=date, y= mean_particle)) + 
         geom_line(aes(color=station)) +
         labs(x = "Date", y = input$line_graph_particulate_selection) +

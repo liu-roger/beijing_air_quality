@@ -105,20 +105,55 @@ navbarPage(
             
         )
       ),
-      fluidRow(style = "border: 1px solid #E54B4B;",
-        column(12,("Line Graph for Comparison"),
-          plotOutput('particulatesLineGraph'),
-        
+      # fluidRow(style = "border: 1px solid #E54B4B;",
+      #   column(12,("Line Graph for Comparison"),
+      #     plotOutput('meanParticulatesLineGraph'),
+      #   
+      #   fluidRow(
+      #     column(6, verbatimTextOutput("station_1_name"),
+      #       DT::dataTableOutput('station_1_dt')
+      #     ),
+      #     column(6, verbatimTextOutput("station_2_name"),
+      #       DT::dataTableOutput('station_2_dt')
+      #     )
+      #   ),
+      #   )
+      # )
+    ),
+    tabsetPanel(
+      tabPanel('Mean',
+        plotOutput('meanParticulatesLineGraph'),
         fluidRow(
-          column(6, verbatimTextOutput("station_1_name"),
-            DT::dataTableOutput('station_1_dt')
+          column(6, verbatimTextOutput("station_1_name_mean"),
+            DT::dataTableOutput('station_1_dt_mean')
           ),
-          column(6, verbatimTextOutput("station_2_name"),
-            DT::dataTableOutput('station_2_dt')
+          column(6, verbatimTextOutput("station_2_name_mean"),
+            DT::dataTableOutput('station_2_dt_mean')
           )
         )
-        )
-      )
+      ),
+      # tabPanel('Maximum',
+      #   plotOutput('maxParticulatesLineGraph'),
+      #   fluidRow(
+      #     column(6, verbatimTextOutput("station_1_name_max"),
+      #            DT::dataTableOutput('station_1_dt_max')
+      #     ),
+      #     column(6, verbatimTextOutput("station_2_name_max"),
+      #            DT::dataTableOutput('station_2_dt_max')
+      #     )
+      #   )
+      # ),
+      # tabPanel('Minimum',
+      #   plotOutput('minParticulatesLineGraph'),
+      #   fluidRow(
+      #     column(6, verbatimTextOutput("station_1_name_max"),
+      #            DT::dataTableOutput('station_1_dt_max')
+      #     ),
+      #     column(6, verbatimTextOutput("station_2_name_max"),
+      #            DT::dataTableOutput('station_2_dt_max')
+      #     )
+      #   )
+      # )
     )
   )
 )
