@@ -179,7 +179,7 @@ function(input, output, session) {
       summarise(mean_monthly = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
     
     # Debug: Show the first few rows of the result
-    print(head(result))
+    # print(head(result))
     return(result)
   })
   
