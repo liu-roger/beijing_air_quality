@@ -98,27 +98,9 @@ navbarPage(
             start = min(all_stations$date), end = max(all_stations$date),
             min =  min(all_stations$date), max = max(all_stations$date)
           ),
-          selectizeInput(inputId = "stat_aggregation",
-            label = "Statistic to be seen:",
-            choices = c('Mean','Maximum', 'Minimum')
-          ),
             
         )
       ),
-      # fluidRow(style = "border: 1px solid #E54B4B;",
-      #   column(12,("Line Graph for Comparison"),
-      #     plotOutput('meanParticulatesLineGraph'),
-      #   
-      #   fluidRow(
-      #     column(6, verbatimTextOutput("station_1_name"),
-      #       DT::dataTableOutput('station_1_dt')
-      #     ),
-      #     column(6, verbatimTextOutput("station_2_name"),
-      #       DT::dataTableOutput('station_2_dt')
-      #     )
-      #   ),
-      #   )
-      # )
     ),
     tabsetPanel(
       tabPanel('Mean',
@@ -153,6 +135,57 @@ navbarPage(
                  DT::dataTableOutput('station_2_dt_min')
           )
         )
+      )
+    )
+  ),
+  
+  tabPanel(
+    h4("Daily/Monthly/Yearly Analysis"),
+    tabsetPanel(
+      tabPanel('Daily',
+        selectizeInput(inputId = "daily_particulate_selection",
+          label = "Particulate Selection",
+          choices = colnames(all_stations)[c(10:19,21)]
+        ),
+        dateInput('daily_date_input',
+          label = 'Date to Analyze: yyyy-mm-dd',
+          value = max(all_stations$date),
+          min =  min(all_stations$date), max = max(all_stations$date)
+        ),
+        plotOutput('daily_particulate_analysis'),
+        fluidRow(
+          column(6, verbatimTextOutput("dqlkdkq"),
+            DT::dataTableOutput('qpjocoqjpowc')
+          ),
+          column(6, verbatimTextOutput("qwdinoiqwnl"),
+            DT::dataTableOutput('anslcnkal')
+          )
+        )
+      ),
+      tabPanel('Monthly',
+        selectizeInput(inputId = "monthly_particulate_selection",
+          label = "Particulate Selection",
+          choices = colnames(all_stations)[c(10:19,21)]
+        ),
+        
+        plotOutput('monthly_particulate_analysis'),
+        fluidRow(
+          column(6, verbatimTextOutput("opwqipo"),
+            DT::dataTableOutput('monthly_dt')
+          )
+        )
+      ),
+      tabPanel('Yearly',
+        selectizeInput(inputId = "yearly_particulate_selection",
+          label = "Particulate Selection",
+          choices = colnames(all_stations)[c(10:19,21)]
+        ),
+      plotOutput('yearly_particulate_analysis'),
+      fluidRow(
+        column(6, verbatimTextOutput("oiqwjd"),
+          DT::dataTableOutput('yearly_dt')
+        ),
+      )
       )
     )
   )

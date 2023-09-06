@@ -15,6 +15,8 @@ library(tidyverse)
 library(ggplot2)
 library(DT)
 library(patchwork)
+library(openair)
+library(plotly)
 
 #data source
 # https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data
@@ -41,34 +43,139 @@ function(input, output, session) {
     return(result)
   })
   
+  
+  all_stations_reactive_max = reactive({
+    
+    # Convert the input to a column name
+    selected_col <- as.name(input$line_graph_particulate_selection) 
+    start_date = as.Date(input$dateRangeLineGraph[1])
+    end_date = as.Date(input$dateRangeLineGraph[2])
+    
+    result <- all_stations %>%
+      filter((station == input$station_name1_line_graph | station == input$station_name2_line_graph) & (date >= start_date & date <= end_date)) %>%
+      group_by(station, date) %>%
+      summarise(max_particle = round(max(!!selected_col, na.rm = TRUE),digits = 3)) # Use !! to unquote the variable name
+    
+    # Debug: Show the first few rows of the result
+    # print(head(result))
+    return(result)
+  })
+  
+  
+  all_stations_reactive_min = reactive({
+    
+    # Convert the input to a column name
+    selected_col <- as.name(input$line_graph_particulate_selection) 
+    start_date = as.Date(input$dateRangeLineGraph[1])
+    end_date = as.Date(input$dateRangeLineGraph[2])
+    
+    result <- all_stations %>%
+      filter((station == input$station_name1_line_graph | station == input$station_name2_line_graph) & (date >= start_date & date <= end_date)) %>%
+      group_by(station, date) %>%
+      summarise(min_particle = round(min(!!selected_col, na.rm = TRUE),digits = 3)) # Use !! to unquote the variable name
+    
+    # Debug: Show the first few rows of the result
+    # print(head(result))
+    return(result)
+  })
+  
+  
+  all_stations_reactive_daily_mean = reactive({
+    
+    # Convert the input to a column name
+    selected_col <- as.name(input$daily_particulate_selection) 
+    selected_date = as.Date(input$daily_date_input)
+    
+    result <- all_stations %>%
+      filter((date == selected_date)) %>%
+      group_by(station, time) %>%
+      summarise(mean_daily = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) # Use !! to unquote the variable name
+    
+    # Debug: Show the first few rows of the result
+    # print(head(result))
+    return(result)
+  })
+  
+  all_stations_reactive_monthly = reactive({
+    
+    # Convert the input to a column name
+    selected_col <- as.name(input$monthly_particulate_selection) 
+    
+    result <- all_stations %>%
+      group_by(station, month, year) %>%
+      summarise(mean_monthly = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
+
+    # Debug: Show the first few rows of the result
+    # print(head(result))
+    return(result)
+  })
+  
+  
+  all_stations_reactive_yearly = reactive({
+    
+    # Convert the input to a column name
+    selected_col <- as.name(input$yearly_particulate_selection) 
+    
+    result <- all_stations %>%
+      group_by(year, station) %>%
+      summarise(mean_yearly = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
+    
+    # Debug: Show the first few rows of the result
+    # print(head(result))
+    return(result)
+  })
+  
   output$heatmap_dt = DT::renderDataTable({
     all_stations[c(1,2,10:19,20,21)]
   })
+  
+  
+  
   output$station_1_dt_mean = DT::renderDataTable({
     DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name1_line_graph,c(2,3)])
-    
   })
   output$station_2_dt_mean = DT::renderDataTable({
     DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name2_line_graph,c(2,3)])
   })
   
+  
+  
+  output$station_1_dt_max = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name1_line_graph,c(2,3)])
+  })
+  output$station_2_dt_max = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name2_line_graph,c(2,3)])
+  })
+  
+  
+  
+  output$station_1_dt_min = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name1_line_graph,c(2,3)])
+  })
+  output$station_2_dt_min = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name2_line_graph,c(2,3)])
+  })
+  
+  
+  
+  
   output$beijing_map = renderLeaflet({
     leaflet() %>%
       addTiles() %>%
       setView(lng = 116.383331,lat = 39.916668 ,zoom = 9) %>%
-      addMarkers(lng = 116.383331,lat = 39.91666, popup = "Beijing City, China") %>%
-      addMarkers(lng = 116.3937,lat = 39.9858, popup = "Aoti ZhongXin") %>%
-      addMarkers(lng = 116.23471,lat = 40.21612 , popup = "Changping") %>%
-      addMarkers(lng = 116.26667,lat = 40.26667, popup = "Dingling") %>%
-      addMarkers(lng = 116.4341,lat = 39.9320, popup = "Dongsi") %>%
-      addMarkers(lng = 116.3609186,lat = 39.9353679, popup = "Guanyuan") %>%
-      addMarkers(lng = 116.179722,lat = 39.913611, popup = "Gucheng") %>%
-      addMarkers(lng = 116.6878,lat = 40.3971, popup = "Huairou") %>%
-      addMarkers(lng = 116.4594991,lat = 39.9425493, popup = "Nongzhanguan") %>%
-      addMarkers(lng = 116.8665,lat = 40.0577, popup = "Shunyi") %>%
-      addMarkers(lng = 116.4066,lat = 39.8822, popup = "Tiantan") %>%
-      addMarkers(lng = 116.2576,lat = 39.9977, popup = "Wanliu") %>%
-      addMarkers(lng = 116.4066,lat = 39.8822, popup = "Wanshouxigong") 
+      addCircleMarkers(lng = 116.383331,lat = 39.91666, popup = "Beijing City, China") %>%
+      addCircleMarkers(lng = 116.3937,lat = 39.9858, popup = "Aoti ZhongXin") %>%
+      addCircleMarkers(lng = 116.23471,lat = 40.21612 , popup = "Changping") %>%
+      addCircleMarkers(lng = 116.26667,lat = 40.26667, popup = "Dingling") %>%
+      addCircleMarkers(lng = 116.4341,lat = 39.9320, popup = "Dongsi") %>%
+      addCircleMarkers(lng = 116.3609186,lat = 39.9353679, popup = "Guanyuan") %>%
+      addCircleMarkers(lng = 116.179722,lat = 39.913611, popup = "Gucheng") %>%
+      addCircleMarkers(lng = 116.6878,lat = 40.3971, popup = "Huairou") %>%
+      addCircleMarkers(lng = 116.4594991,lat = 39.9425493, popup = "Nongzhanguan") %>%
+      addCircleMarkers(lng = 116.8665,lat = 40.0577, popup = "Shunyi") %>%
+      addCircleMarkers(lng = 116.4066,lat = 39.8822, popup = "Tiantan") %>%
+      addCircleMarkers(lng = 116.2576,lat = 39.9977, popup = "Wanliu") %>%
+      addCircleMarkers(lng = 116.352,lat = 39.878, popup = "Wanshouxigong") 
   }
   )
   # all_stations_reactive = reactive({
@@ -86,16 +193,71 @@ function(input, output, session) {
     all_stations_reactive_mean() %>%
       ggplot(aes(x=date, y= mean_particle)) + 
         geom_line(aes(color=station)) +
-        labs(x = "Date", y = input$line_graph_particulate_selection) +
+        labs(title = 'Mean Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
         facet_grid(rows = vars(station))
   )
   
+  
+  output$maxParticulatesLineGraph = renderPlot(
+    all_stations_reactive_max() %>%
+      ggplot(aes(x=date, y= max_particle)) + 
+      geom_line(aes(color=station)) +
+      labs(title = 'Max Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
+      facet_grid(rows = vars(station))
+    
+  )
+  
+  
+  output$minParticulatesLineGraph = renderPlot(
+    all_stations_reactive_min() %>%
+      ggplot(aes(x=date, y= min_particle)) + 
+      geom_line(aes(color=station)) +
+      labs(title = 'Min Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
+      facet_grid(rows = vars(station))
+  )
+  
+  output$monthly_particulate_analysis = renderPlot(
+    all_stations_reactive_monthly() %>%
+      ggplot(aes(month, mean_monthly)) + geom_point(aes(color=station)) + 
+      facet_grid(rows = vars(year))
+  )
+  
+  output$daily_particulate_analysis = renderPlot(
+    all_stations_reactive_daily_mean() %>%
+      ggplot(aes(time, mean_daily)) + geom_point(aes(color=station)) + 
+      facet_grid(rows = vars(station))
+  )
+  
+  output$yearly_particulate_analysis = renderPlot(
+    all_stations_reactive_yearly() %>%
+      ggplot(aes(year, mean_yearly)) + geom_point(aes(color=station)) 
+  )
+  
+  
+  
+  
   output$station_1_name_mean  <- renderText({
-    paste("Station Name:", as.character(input$station_name1_line_graph), as.character(input$stat_aggregation),as.character(input$line_graph_particulate_selection))
+    paste("Station Name:", as.character(input$station_name1_line_graph), 'Daily Average',as.character(input$line_graph_particulate_selection))
+  })
+  output$station_2_name_mean  <- renderText({
+    paste("Station Name:", as.character(input$station_name2_line_graph), 'Daily Average',as.character(input$line_graph_particulate_selection))
   })
   
-  output$station_2_name_mean  <- renderText({
-    paste("Station Name:", as.character(input$station_name2_line_graph), as.character(input$stat_aggregation),as.character(input$line_graph_particulate_selection))
+  
+  output$station_1_name_max  <- renderText({
+    paste("Station Name:", as.character(input$station_name1_line_graph), 'Daily Max',as.character(input$line_graph_particulate_selection))
+  })
+  output$station_2_name_max  <- renderText({
+    paste("Station Name:", as.character(input$station_name2_line_graph), 'Daily Max',as.character(input$line_graph_particulate_selection))
+    
+  })
+  
+  
+  output$station_1_name_min  <- renderText({
+    paste("Station Name:", as.character(input$station_name1_line_graph), 'Daily Min',as.character(input$line_graph_particulate_selection))
+  })
+  output$station_2_name_min  <- renderText({
+    paste("Station Name:", as.character(input$station_name2_line_graph), 'Daily Min',as.character(input$line_graph_particulate_selection))
     
   })
     
