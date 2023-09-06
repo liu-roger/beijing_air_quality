@@ -17,6 +17,7 @@ library(DT)
 library(patchwork)
 library(openair)
 library(plotly)
+# ______________________________________________________________________________________________________________________
 
 #data source
 # https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data
@@ -43,7 +44,15 @@ function(input, output, session) {
     return(result)
   })
   
-  
+  output$meanParticulatesLineGraph = renderPlot(
+    all_stations_reactive_mean() %>%
+      ggplot(aes(x=date, y= mean_particle)) + 
+      geom_line(aes(color=station)) +
+      labs(title = 'Mean Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
+      facet_grid(rows = vars(station))
+  )
+# ______________________________________________________________________________________________________________________
+
   all_stations_reactive_max = reactive({
     
     # Convert the input to a column name
@@ -61,6 +70,15 @@ function(input, output, session) {
     return(result)
   })
   
+  output$maxParticulatesLineGraph = renderPlot(
+    all_stations_reactive_max() %>%
+      ggplot(aes(x=date, y= max_particle)) + 
+      geom_line(aes(color=station)) +
+      labs(title = 'Max Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
+      facet_grid(rows = vars(station))
+  )
+  
+# ______________________________________________________________________________________________________________________
   
   all_stations_reactive_min = reactive({
     
@@ -79,6 +97,15 @@ function(input, output, session) {
     return(result)
   })
   
+  output$minParticulatesLineGraph = renderPlot(
+    all_stations_reactive_min() %>%
+      ggplot(aes(x=date, y= min_particle)) + 
+      geom_line(aes(color=station)) +
+      labs(title = 'Min Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
+      facet_grid(rows = vars(station))
+  )
+  
+# ______________________________________________________________________________________________________________________
   
   all_stations_reactive_daily_mean = reactive({
     
@@ -89,47 +116,105 @@ function(input, output, session) {
     result <- all_stations %>%
       filter((date == selected_date)) %>%
       group_by(station, time) %>%
-      summarise(mean_daily = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) # Use !! to unquote the variable name
+      summarise(mean_hourly = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) # Use !! to unquote the variable name
     
     # Debug: Show the first few rows of the result
     # print(head(result))
     return(result)
   })
   
-  all_stations_reactive_monthly = reactive({
+  output$daily_particulate_analysis = renderPlot(
+    all_stations_reactive_daily_mean() %>%
+      ggplot(aes(time, mean_hourly)) + geom_line(aes(color=station)) + geom_point(aes(color=station))
+    # facet_grid(rows = vars(station))
+  )
+  
+# ______________________________________________________________________________________________________________________
+  
+  all_stations_reactive_yearly = reactive({
     
     # Convert the input to a column name
     selected_col <- as.name(input$monthly_particulate_selection) 
     
     result <- all_stations %>%
+      filter(year == input$year_selection_monthly_analysis) %>%
       group_by(station, month, year) %>%
-      summarise(mean_monthly = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
+      summarise(mean_yearly = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
 
     # Debug: Show the first few rows of the result
     # print(head(result))
     return(result)
   })
   
+  output$yearly_particulate_analysis = renderPlot(
+    all_stations_reactive_yearly() %>%
+      ggplot(aes(month, mean_yearly)) + geom_line(aes(color=station)) +geom_point(aes(color=station)) 
+    # facet_grid(rows = vars(year))
+  )
   
-  all_stations_reactive_yearly = reactive({
+# ______________________________________________________________________________________________________________________
+  
+  all_stations_reactive_monthly = reactive({
+    
+    # Convert the input to a column name
+    selected_col <- as.name(input$monthly_particulate_selection) 
+    # selected_month = as.numeric(input$month_selection)
+    selected_month = switch(input$month_selection,
+                            'January' = 1,
+                            'February' = 2,
+                            'March' = 3,
+                            'April' = 4,
+                            'May' = 5,
+                            'June' = 6,
+                            'July' = 7,
+                            'August' = 8,
+                            'September' = 9,
+                            'October' = 10,
+                            'November' = 11,
+                            'December' = 12)
+    
+    result <- all_stations %>%
+      filter((year == input$year_selection_monthly_analysis) & (month == selected_month)) %>%
+      group_by(station, day) %>%
+      summarise(mean_monthly = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
+    
+    # Debug: Show the first few rows of the result
+    print(head(result))
+    return(result)
+  })
+  
+  output$month_analysis = renderPlot(
+    all_stations_reactive_monthly() %>%
+      ggplot(aes(day, mean_monthly)) + geom_point(aes(color=station)) #+ geom_point(aes(color=station))
+    # facet_grid(rows = vars(year))
+  )
+  
+# ______________________________________________________________________________________________________________________
+  
+  all_stations_reactive_aggregate = reactive({
     
     # Convert the input to a column name
     selected_col <- as.name(input$yearly_particulate_selection) 
     
     result <- all_stations %>%
       group_by(year, station) %>%
-      summarise(mean_yearly = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
+      summarise(mean_aggregate = round(mean(!!selected_col, na.rm = TRUE),digits = 3)) 
     
     # Debug: Show the first few rows of the result
     # print(head(result))
     return(result)
   })
   
+  output$aggregate_particulate_analysis = renderPlot(
+    all_stations_reactive_aggregate() %>%
+      ggplot(aes(year, mean_aggregate)) + geom_line(aes(color=station)) + geom_point(aes(color=station))
+  )
+# ______________________________________________________________________________________________________________________
+  
+  
   output$heatmap_dt = DT::renderDataTable({
     all_stations[c(1,2,10:19,20,21)]
   })
-  
-  
   
   output$station_1_dt_mean = DT::renderDataTable({
     DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name1_line_graph,c(2,3)])
@@ -157,6 +242,11 @@ function(input, output, session) {
   })
   
   
+  output$mean_daily_particulate = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_daily_mean())
+  })
+  
+  
   
   
   output$beijing_map = renderLeaflet({
@@ -178,62 +268,6 @@ function(input, output, session) {
       addCircleMarkers(lng = 116.352,lat = 39.878, popup = "Wanshouxigong") 
   }
   )
-  # all_stations_reactive = reactive({
-  #   all_stations %>%
-  #     select(station,input$line_graph_particulate_selection)
-  #     filter(station == input$station_name1_line_graph) %>%
-  #     group_by(date) %>%
-  #     summarise(mean_particle = mean(input$line_graph_particulate_selection))
-  # })
-  # 
-  
-  
-  
-  output$meanParticulatesLineGraph = renderPlot(
-    all_stations_reactive_mean() %>%
-      ggplot(aes(x=date, y= mean_particle)) + 
-        geom_line(aes(color=station)) +
-        labs(title = 'Mean Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
-        facet_grid(rows = vars(station))
-  )
-  
-  
-  output$maxParticulatesLineGraph = renderPlot(
-    all_stations_reactive_max() %>%
-      ggplot(aes(x=date, y= max_particle)) + 
-      geom_line(aes(color=station)) +
-      labs(title = 'Max Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
-      facet_grid(rows = vars(station))
-    
-  )
-  
-  
-  output$minParticulatesLineGraph = renderPlot(
-    all_stations_reactive_min() %>%
-      ggplot(aes(x=date, y= min_particle)) + 
-      geom_line(aes(color=station)) +
-      labs(title = 'Min Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
-      facet_grid(rows = vars(station))
-  )
-  
-  output$monthly_particulate_analysis = renderPlot(
-    all_stations_reactive_monthly() %>%
-      ggplot(aes(month, mean_monthly)) + geom_point(aes(color=station)) + 
-      facet_grid(rows = vars(year))
-  )
-  
-  output$daily_particulate_analysis = renderPlot(
-    all_stations_reactive_daily_mean() %>%
-      ggplot(aes(time, mean_daily)) + geom_point(aes(color=station)) + 
-      facet_grid(rows = vars(station))
-  )
-  
-  output$yearly_particulate_analysis = renderPlot(
-    all_stations_reactive_yearly() %>%
-      ggplot(aes(year, mean_yearly)) + geom_point(aes(color=station)) 
-  )
-  
-  
   
   
   output$station_1_name_mean  <- renderText({

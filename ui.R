@@ -140,7 +140,7 @@ navbarPage(
   ),
   
   tabPanel(
-    h4("Daily/Monthly/Yearly Analysis"),
+    h4("Time Series Analysis"),
     tabsetPanel(
       tabPanel('Daily',
         selectizeInput(inputId = "daily_particulate_selection",
@@ -155,32 +155,43 @@ navbarPage(
         plotOutput('daily_particulate_analysis'),
         fluidRow(
           column(6, verbatimTextOutput("dqlkdkq"),
-            DT::dataTableOutput('qpjocoqjpowc')
+            DT::dataTableOutput('mean_daily_particulate')
           ),
           column(6, verbatimTextOutput("qwdinoiqwnl"),
             DT::dataTableOutput('anslcnkal')
           )
         )
       ),
-      tabPanel('Monthly',
+      tabPanel('Monthly and Yearly',
         selectizeInput(inputId = "monthly_particulate_selection",
           label = "Particulate Selection",
           choices = colnames(all_stations)[c(10:19,21)]
         ),
         
-        plotOutput('monthly_particulate_analysis'),
+        selectizeInput(inputId = "year_selection_monthly_analysis",
+          label = "Year to Analyze",
+          choices = unique(all_stations[4])
+        ),
+        selectizeInput(inputId = "month_selection",
+          label = "Month of Year to Analyze",
+          choices = c('January','February','March','April','May','June','July','August','September','October','November','December'),
+          selected = 'March'
+        ),
+        
+        plotOutput('yearly_particulate_analysis'),
+        plotOutput('month_analysis'),
         fluidRow(
           column(6, verbatimTextOutput("opwqipo"),
             DT::dataTableOutput('monthly_dt')
           )
         )
       ),
-      tabPanel('Yearly',
+      tabPanel('Aggregate Analysis',
         selectizeInput(inputId = "yearly_particulate_selection",
           label = "Particulate Selection",
           choices = colnames(all_stations)[c(10:19,21)]
         ),
-      plotOutput('yearly_particulate_analysis'),
+      plotOutput('aggregate_particulate_analysis'),
       fluidRow(
         column(6, verbatimTextOutput("oiqwjd"),
           DT::dataTableOutput('yearly_dt')
