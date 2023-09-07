@@ -154,11 +154,8 @@ navbarPage(
         ),
         plotOutput('daily_particulate_analysis'),
         fluidRow(
-          column(6, verbatimTextOutput("dqlkdkq"),
+          column(12, verbatimTextOutput("daily_dt_name"),
             DT::dataTableOutput('mean_daily_particulate')
-          ),
-          column(6, verbatimTextOutput("qwdinoiqwnl"),
-            DT::dataTableOutput('anslcnkal')
           )
         )
       ),
@@ -181,20 +178,23 @@ navbarPage(
         plotOutput('yearly_particulate_analysis'),
         plotOutput('month_analysis'),
         fluidRow(
-          column(6, verbatimTextOutput("opwqipo"),
+          column(6, verbatimTextOutput("yearly_dt_name"),
+            DT::dataTableOutput('yearly_dt')
+          ),
+          column(6, verbatimTextOutput("monthly_dt_name"),
             DT::dataTableOutput('monthly_dt')
           )
         )
       ),
       tabPanel('Aggregate Analysis',
-        selectizeInput(inputId = "yearly_particulate_selection",
+        selectizeInput(inputId = "aggregate_particulate_selection",
           label = "Particulate Selection",
           choices = colnames(all_stations)[c(10:19,21)]
         ),
       plotOutput('aggregate_particulate_analysis'),
       fluidRow(
-        column(6, verbatimTextOutput("oiqwjd"),
-          DT::dataTableOutput('yearly_dt')
+        column(12, verbatimTextOutput("aggregate_dt_name"),
+          DT::dataTableOutput('aggregate_dt')
         ),
       )
       )

@@ -51,6 +51,13 @@ function(input, output, session) {
       labs(title = 'Mean Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
       facet_grid(rows = vars(station))
   )
+  
+  output$station_1_dt_mean = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name1_line_graph,c(2,3)])
+  })
+  output$station_2_dt_mean = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name2_line_graph,c(2,3)])
+  })
 # ______________________________________________________________________________________________________________________
 
   all_stations_reactive_max = reactive({
@@ -77,6 +84,13 @@ function(input, output, session) {
       labs(title = 'Max Metric by Day', x = "Date", y = input$line_graph_particulate_selection) +
       facet_grid(rows = vars(station))
   )
+  
+  output$station_1_dt_max = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name1_line_graph,c(2,3)])
+  })
+  output$station_2_dt_max = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name2_line_graph,c(2,3)])
+  })
   
 # ______________________________________________________________________________________________________________________
   
@@ -105,6 +119,13 @@ function(input, output, session) {
       facet_grid(rows = vars(station))
   )
   
+  output$station_1_dt_min = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name1_line_graph,c(2,3)])
+  })
+  output$station_2_dt_min = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name2_line_graph,c(2,3)])
+  })
+  
 # ______________________________________________________________________________________________________________________
   
   all_stations_reactive_daily_mean = reactive({
@@ -125,9 +146,15 @@ function(input, output, session) {
   
   output$daily_particulate_analysis = renderPlot(
     all_stations_reactive_daily_mean() %>%
-      ggplot(aes(time, mean_hourly)) + geom_line(aes(color=station)) + geom_point(aes(color=station))
+      ggplot(aes(time, mean_hourly)) + geom_line(aes(color=station)) + geom_point(aes(color=station))+
+      labs(title = 'Hourly Analysis', x = "Hour of the Day", y = input$daily_particulate_selection) 
+      
     # facet_grid(rows = vars(station))
   )
+  
+  output$mean_daily_particulate = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_daily_mean())
+  })
   
 # ______________________________________________________________________________________________________________________
   
@@ -148,9 +175,15 @@ function(input, output, session) {
   
   output$yearly_particulate_analysis = renderPlot(
     all_stations_reactive_yearly() %>%
-      ggplot(aes(month, mean_yearly)) + geom_line(aes(color=station)) +geom_point(aes(color=station)) 
+      ggplot(aes(month, mean_yearly)) + geom_line(aes(color=station)) +geom_point(aes(color=station)) +
+      labs(title = 'Analysis by Month', x = "Month", y = input$monthly_particulate_selection) 
+    
     # facet_grid(rows = vars(year))
   )
+  
+  output$yearly_dt = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_yearly())
+  })
   
 # ______________________________________________________________________________________________________________________
   
@@ -185,16 +218,20 @@ function(input, output, session) {
   
   output$month_analysis = renderPlot(
     all_stations_reactive_monthly() %>%
-      ggplot(aes(day, mean_monthly)) + geom_point(aes(color=station)) #+ geom_point(aes(color=station))
-    # facet_grid(rows = vars(year))
+      ggplot(aes(day, mean_monthly)) + geom_point(aes(color=station)) + 
+      labs(title = 'Analysis by Day', x = "Day of the Month", y = input$monthly_particulate_selection) 
   )
+  
+  output$monthly_dt = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_monthly())
+  })
   
 # ______________________________________________________________________________________________________________________
   
   all_stations_reactive_aggregate = reactive({
     
     # Convert the input to a column name
-    selected_col <- as.name(input$yearly_particulate_selection) 
+    selected_col <- as.name(input$aggregate_particulate_selection) 
     
     result <- all_stations %>%
       group_by(year, station) %>%
@@ -207,46 +244,20 @@ function(input, output, session) {
   
   output$aggregate_particulate_analysis = renderPlot(
     all_stations_reactive_aggregate() %>%
-      ggplot(aes(year, mean_aggregate)) + geom_line(aes(color=station)) + geom_point(aes(color=station))
+      ggplot(aes(year, mean_aggregate)) + geom_line(aes(color=station)) + geom_point(aes(color=station)) +
+      labs(title = 'Analysis by Year', x = "Day of the Month", y = input$aggregate_particulate_selection) 
+    
   )
+  
+  output$aggregate_dt = DT::renderDataTable({
+    DT::datatable(all_stations_reactive_aggregate())
+  })
 # ______________________________________________________________________________________________________________________
   
   
   output$heatmap_dt = DT::renderDataTable({
     all_stations[c(1,2,10:19,20,21)]
   })
-  
-  output$station_1_dt_mean = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name1_line_graph,c(2,3)])
-  })
-  output$station_2_dt_mean = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name2_line_graph,c(2,3)])
-  })
-  
-  
-  
-  output$station_1_dt_max = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name1_line_graph,c(2,3)])
-  })
-  output$station_2_dt_max = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name2_line_graph,c(2,3)])
-  })
-  
-  
-  
-  output$station_1_dt_min = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name1_line_graph,c(2,3)])
-  })
-  output$station_2_dt_min = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name2_line_graph,c(2,3)])
-  })
-  
-  
-  output$mean_daily_particulate = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_daily_mean())
-  })
-  
-  
   
   
   output$beijing_map = renderLeaflet({
@@ -293,6 +304,22 @@ function(input, output, session) {
   output$station_2_name_min  <- renderText({
     paste("Station Name:", as.character(input$station_name2_line_graph), 'Daily Min',as.character(input$line_graph_particulate_selection))
     
+  })
+  
+  output$daily_dt_name  <- renderText({
+    paste('Hourly Analysis of',as.character(input$daily_particulate_selection),'on',as.character(input$daily_date_input), 'for all stations')
+  })
+  
+  output$yearly_dt_name  <- renderText({
+    paste('Monthly Analysis of',as.character(input$monthly_particulate_selection),'in',as.character(input$year_selection_monthly_analysis), 'for all stations')
+  })
+  
+  output$monthly_dt_name  <- renderText({
+    paste('Daily Analysis of', as.character(input$monthly_particulate_selection),'of',as.character(input$month_selection),'of',as.character(input$year_selection_monthly_analysis),'for all stations')
+  })
+  
+  output$aggregate_dt_name  <- renderText({
+    paste('Yearly Analysis of',as.character(input$aggregate_particulate_selection), 'for all stations from 2013 - 2017' )
   })
     
 }
