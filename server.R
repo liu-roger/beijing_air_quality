@@ -7,16 +7,7 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
-library(leaflet)
-library(maps)
-library(dplyr)
-library(tidyverse)
-library(ggplot2)
-library(DT)
-library(patchwork)
-library(openair)
-library(plotly)
+
 # ______________________________________________________________________________________________________________________
 
 #data source
@@ -26,6 +17,121 @@ library(plotly)
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
+  
+  heatmap_reactive_df = reactive({
+    
+    # Convert the input to a column name
+    selected_col <- as.name(input$heatmap_particulate_selection) 
+    selected_date = as.Date(input$heatmap_date_input)
+    selected_col_percentage = as.name(paste0('percent_', tolower(input$heatmap_particulate_selection)))
+    
+    print(selected_col_percentage)
+    print(class(selected_col))
+  
+    result <- all_stations %>%
+      filter(date == selected_date) %>%
+      select(station,date, selected_col,total_particulates, selected_col_percentage) %>%
+      group_by(station) %>%
+      summarise(mean_particle = round(mean(!!selected_col, na.rm = TRUE),digits = 3),
+                mean_total_particulate = round(mean(total_particulates, na.rm = TRUE),digits = 3),
+                mean_particulate_percentage = round(mean(!!selected_col_percentage, na.rm = TRUE),digits = 3)
+                )
+    
+    # Debug: Show the first few rows of the result
+    print(head(result))
+    return(result)
+  })
+  
+  output$heatmap_dt = DT::renderDataTable({
+    datatable(heatmap_reactive_df(),
+              options = list(
+                lengthMenu = c(12,24)
+              )
+     )
+  })
+  
+  output$beijing_map = renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      setView(lng = 116.383331,lat = 40.1 ,zoom = 9) %>%
+      addCircleMarkers(lng = 116.383331,lat = 39.91666, popup = paste('Beijing City, China')
+                       ) %>%
+      addCircleMarkers(lng = 116.3937,lat = 39.9858, popup = paste("Aotizhongxin", '<br>',
+                                                                   'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Aotizhongxin', ]$mean_particle, '<br>',
+                                                                   'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Aotizhongxin', ]$mean_total_particulate, '<br>',
+                                                                   'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Aotizhongxin', ]$mean_particulate_percentage, '<br>'
+                                                                   )
+                       ) %>%
+      addCircleMarkers(lng = 116.23471,lat = 40.21612 , popup = paste("Changping", '<br>',
+                                                                      'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Changping', ]$mean_particle, '<br>',
+                                                                      'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Changping', ]$mean_total_particulate, '<br>',
+                                                                      'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Changping', ]$mean_particulate_percentage, '<br>'
+                                                                      )
+                       ) %>%
+      addCircleMarkers(lng = 116.26667,lat = 40.26667, popup = paste("Dingling", '<br>',
+                                                                     'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Dingling', ]$mean_particle, '<br>',
+                                                                     'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Dingling', ]$mean_total_particulate, '<br>',
+                                                                     'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Dingling', ]$mean_particulate_percentage, '<br>'
+                                                                     )
+                       ) %>%
+      addCircleMarkers(lng = 116.4341,lat = 39.9320, popup = paste("Dongsi", '<br>',
+                                                                   'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Dongsi', ]$mean_particle, '<br>',
+                                                                   'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Dongsi', ]$mean_total_particulate, '<br>',
+                                                                   'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Dongsi', ]$mean_particulate_percentage, '<br>'
+                                                                   )
+                       ) %>%
+      addCircleMarkers(lng = 116.3609186,lat = 39.9353679, popup = paste("Guanyuan", '<br>',
+                                                                         'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Guanyuan', ]$mean_particle, '<br>',
+                                                                         'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Guanyuan', ]$mean_total_particulate, '<br>',
+                                                                         'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Guanyuan', ]$mean_particulate_percentage, '<br>'
+                                                                         )
+                       ) %>%
+      addCircleMarkers(lng = 116.179722,lat = 39.913611, popup = paste("Gucheng", '<br>',
+                                                                       'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Gucheng', ]$mean_particle, '<br>',
+                                                                       'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Gucheng', ]$mean_total_particulate, '<br>',
+                                                                       'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Gucheng', ]$mean_particulate_percentage, '<br>'
+                                                                      )
+                       ) %>%
+      addCircleMarkers(lng = 116.6878,lat = 40.3971, popup = paste("Huairou", '<br>',
+                                                                   'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Huairou', ]$mean_particle, '<br>',
+                                                                   'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Huairou', ]$mean_total_particulate, '<br>',
+                                                                   'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Huairou', ]$mean_particulate_percentage, '<br>'
+                                                                   )
+                       ) %>%
+      addCircleMarkers(lng = 116.4594991,lat = 39.9425493, popup = paste("Nongzhanguan", '<br>',
+                                                                         'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Nongzhanguan', ]$mean_particle, '<br>',
+                                                                         'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Nongzhanguan', ]$mean_total_particulate, '<br>',
+                                                                         'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Nongzhanguan', ]$mean_particulate_percentage, '<br>'
+                                                                        )
+                       ) %>%
+      addCircleMarkers(lng = 116.8665,lat = 40.0577, popup = paste("Shunyi", '<br>',
+                                                                   'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Shunyi', ]$mean_particle, '<br>',
+                                                                   'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Shunyi', ]$mean_total_particulate, '<br>',
+                                                                   'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Shunyi', ]$mean_particulate_percentage, '<br>'
+                                                                   )
+                       ) %>%
+      addCircleMarkers(lng = 116.4066,lat = 39.8822, popup = paste("Tiantan", '<br>',
+                                                                   'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Tiantan', ]$mean_particle, '<br>',
+                                                                   'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Tiantan', ]$mean_total_particulate, '<br>',
+                                                                   'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Tiantan', ]$mean_particulate_percentage, '<br>'
+                                                                   )
+                       ) %>%
+      addCircleMarkers(lng = 116.2576,lat = 39.9977, popup = paste("Wanliu", '<br>',
+                                                                   'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Wanliu', ]$mean_particle, '<br>',
+                                                                   'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Wanliu', ]$mean_total_particulate, '<br>',
+                                                                   'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Wanliu', ]$mean_particulate_percentage, '<br>'
+                                                                   )
+                       ) %>%
+      addCircleMarkers(lng = 116.352,lat = 39.878, popup = paste("Wanshouxigong", '<br>',
+                                                                 'Avg',input$heatmap_particulate_selection, 'conc. :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Wanshouxigong', ]$mean_particle, '<br>',
+                                                                 'Total Particulates :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Wanshouxigong', ]$mean_total_particulate, '<br>',
+                                                                 'Avg Particulate Percent :', heatmap_reactive_df()[heatmap_reactive_df()$station == 'Wanshouxigong', ]$mean_particulate_percentage, '<br>'
+                                                                 )
+                       ) 
+  }
+  )
+  
+# ______________________________________________________________________________________________________________________
   
   all_stations_reactive_mean = reactive({
     
@@ -53,10 +159,16 @@ function(input, output, session) {
   )
   
   output$station_1_dt_mean = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name1_line_graph,c(2,3)])
+    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name1_line_graph,c(2,3)],
+                  options = list(
+                    lengthMenu = c(31,62)
+                  ))
   })
   output$station_2_dt_mean = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name2_line_graph,c(2,3)])
+    DT::datatable(all_stations_reactive_mean()[all_stations_reactive_mean()$station==input$station_name2_line_graph,c(2,3)],
+                  options = list(
+                    lengthMenu = c(31,62)
+                  ))
   })
 # ______________________________________________________________________________________________________________________
 
@@ -73,7 +185,7 @@ function(input, output, session) {
       summarise(max_particle = round(max(!!selected_col, na.rm = TRUE),digits = 3)) # Use !! to unquote the variable name
     
     # Debug: Show the first few rows of the result
-    # print(head(result))
+    print(head(result))
     return(result)
   })
   
@@ -86,10 +198,16 @@ function(input, output, session) {
   )
   
   output$station_1_dt_max = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name1_line_graph,c(2,3)])
+    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name1_line_graph,c(2,3)],
+                  options = list(
+                    lengthMenu = c(31,62)
+                    ))
   })
   output$station_2_dt_max = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name2_line_graph,c(2,3)])
+    DT::datatable(all_stations_reactive_max()[all_stations_reactive_max()$station==input$station_name2_line_graph,c(2,3)],
+                  options = list(
+                    lengthMenu = c(31,62)
+                    ))
   })
   
 # ______________________________________________________________________________________________________________________
@@ -120,10 +238,16 @@ function(input, output, session) {
   )
   
   output$station_1_dt_min = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name1_line_graph,c(2,3)])
+    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name1_line_graph,c(2,3)],
+                  options = list(
+                    lengthMenu = c(31,62)
+                    ))
   })
   output$station_2_dt_min = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name2_line_graph,c(2,3)])
+    DT::datatable(all_stations_reactive_min()[all_stations_reactive_min()$station==input$station_name2_line_graph,c(2,3)],
+                  options = list(
+                    lengthMenu = c(31,62)
+                    ))
   })
   
 # ______________________________________________________________________________________________________________________
@@ -146,14 +270,17 @@ function(input, output, session) {
   
   output$daily_particulate_analysis = renderPlot(
     all_stations_reactive_daily_mean() %>%
-      ggplot(aes(time, mean_hourly)) + geom_line(aes(color=station)) + geom_point(aes(color=station))+
+      ggplot(aes(time, mean_hourly)) + geom_line(aes(color=station)) + geom_point(aes(color=station)) +
       labs(title = 'Hourly Analysis', x = "Hour of the Day", y = input$daily_particulate_selection) 
       
     # facet_grid(rows = vars(station))
   )
   
   output$mean_daily_particulate = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_daily_mean())
+    DT::datatable(all_stations_reactive_daily_mean(),
+                  options = list(
+                    lengthMenu = c(24,48,72)
+                    ))
   })
   
 # ______________________________________________________________________________________________________________________
@@ -176,13 +303,17 @@ function(input, output, session) {
   output$yearly_particulate_analysis = renderPlot(
     all_stations_reactive_yearly() %>%
       ggplot(aes(month, mean_yearly)) + geom_line(aes(color=station)) +geom_point(aes(color=station)) +
-      labs(title = 'Analysis by Month', x = "Month", y = input$monthly_particulate_selection) 
+      labs(title = 'Analysis by Month', x = "Month", y = input$monthly_particulate_selection) +
+      scale_x_continuous(breaks = c(seq(1, 12, by = 1))) # Include the initial value
     
     # facet_grid(rows = vars(year))
   )
   
   output$yearly_dt = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_yearly())
+    DT::datatable(all_stations_reactive_yearly(),
+                  options = list(
+                    lengthMenu = c(12,24)
+                    ))
   })
   
 # ______________________________________________________________________________________________________________________
@@ -219,11 +350,16 @@ function(input, output, session) {
   output$month_analysis = renderPlot(
     all_stations_reactive_monthly() %>%
       ggplot(aes(day, mean_monthly)) + geom_point(aes(color=station)) + 
-      labs(title = 'Analysis by Day', x = "Day of the Month", y = input$monthly_particulate_selection) 
+      labs(title = 'Analysis by Day', x = "Day of the Month", y = input$monthly_particulate_selection) +
+      scale_x_continuous(breaks = c(seq(1, 31, by = 1))) # Include the initial value
+    
   )
   
   output$monthly_dt = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_monthly())
+    DT::datatable(all_stations_reactive_monthly(),
+                  options = list(
+                    lengthMenu = c(31,62)
+                    ))
   })
   
 # ______________________________________________________________________________________________________________________
@@ -250,35 +386,13 @@ function(input, output, session) {
   )
   
   output$aggregate_dt = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_aggregate())
+    DT::datatable(all_stations_reactive_aggregate(),
+                  options = list(
+                    lengthMenu = c(12,24)
+                    ))
   })
 # ______________________________________________________________________________________________________________________
   
-  
-  output$heatmap_dt = DT::renderDataTable({
-    all_stations[c(1,2,10:19,20,21)]
-  })
-  
-  
-  output$beijing_map = renderLeaflet({
-    leaflet() %>%
-      addTiles() %>%
-      setView(lng = 116.383331,lat = 39.916668 ,zoom = 9) %>%
-      addCircleMarkers(lng = 116.383331,lat = 39.91666, popup = "Beijing City, China") %>%
-      addCircleMarkers(lng = 116.3937,lat = 39.9858, popup = "Aoti ZhongXin") %>%
-      addCircleMarkers(lng = 116.23471,lat = 40.21612 , popup = "Changping") %>%
-      addCircleMarkers(lng = 116.26667,lat = 40.26667, popup = "Dingling") %>%
-      addCircleMarkers(lng = 116.4341,lat = 39.9320, popup = "Dongsi") %>%
-      addCircleMarkers(lng = 116.3609186,lat = 39.9353679, popup = "Guanyuan") %>%
-      addCircleMarkers(lng = 116.179722,lat = 39.913611, popup = "Gucheng") %>%
-      addCircleMarkers(lng = 116.6878,lat = 40.3971, popup = "Huairou") %>%
-      addCircleMarkers(lng = 116.4594991,lat = 39.9425493, popup = "Nongzhanguan") %>%
-      addCircleMarkers(lng = 116.8665,lat = 40.0577, popup = "Shunyi") %>%
-      addCircleMarkers(lng = 116.4066,lat = 39.8822, popup = "Tiantan") %>%
-      addCircleMarkers(lng = 116.2576,lat = 39.9977, popup = "Wanliu") %>%
-      addCircleMarkers(lng = 116.352,lat = 39.878, popup = "Wanshouxigong") 
-  }
-  )
   
   
   output$station_1_name_mean  <- renderText({

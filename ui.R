@@ -6,15 +6,7 @@
 #
 #    http://shiny.rstudio.com/
 
-library(shiny)
-library(leaflet)
-library(maps)
-library(dplyr)
-library(tidyverse)
-library(ggplot2)
-library(DT)
-library(con2aqi)
-library(shinyWidgets)
+
 #data source
 # https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data
 # https://www.apple.com/startpage/
@@ -46,18 +38,19 @@ navbarPage(
       fluidRow(style = "border: 1px solid #E54B4B;",
         column(6,
           div(
-            dateRangeInput('date_range_heatmap_datatable',
-              label = 'Date range input for the Data Table: yyyy-mm-dd',
-              start = Sys.Date() - 2, end = Sys.Date() + 2
+            selectizeInput(inputId = "heatmap_particulate_selection",
+              label = "Particulate Selection",
+              choices = colnames(all_stations)[c(10:15)]
             ),
           style = "display: flex; flex-direction: column; align-items: center; justify-content: center;",   
           )
         ),
         column(6,
           div(
-            dateInput('date_heatmap',
-              label = 'Date input for the heatmap: yyyy-mm-dd',
-              value = Sys.Date()
+            dateInput('heatmap_date_input',
+              label = 'Date to Analyze: yyyy-mm-dd',
+              value = max(all_stations$date),
+              min =  min(all_stations$date), max = max(all_stations$date)
             ),
           style = "display: flex; flex-direction: column; align-items: center; justify-content: center;"
           )
