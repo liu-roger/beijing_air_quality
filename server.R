@@ -39,7 +39,7 @@ function(input, output, session) {
     
     # Debug: Show the first few rows of the result
     # print(head(result))
-    result = result %>% arrange(desc(mean_particle))
+    
     return(result)
   })
   
@@ -82,7 +82,8 @@ function(input, output, session) {
                        label = paste(heatmap_reactive_df()$station),
                        color = ~color_info$color_scale(mean_particle),  # Use color_scale
                        opacity = 0.85,
-                       popup = paste('Avg',input$heatmap_particulate_selection, 'conc. :',heatmap_reactive_df()$mean_particle  ,'<br>',
+                       popup = paste(heatmap_reactive_df()$station,'<br>',
+                                    'Avg',input$heatmap_particulate_selection, 'conc. :',heatmap_reactive_df()$mean_particle  ,'<br>',
                                     'Total Particulates :', heatmap_reactive_df()$mean_total_particulate, '<br>',
                                     'Avg Particulate Percent :', heatmap_reactive_df()$mean_particulate_percentage
                                     ) 
