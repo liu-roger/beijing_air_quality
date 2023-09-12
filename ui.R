@@ -91,7 +91,7 @@ navbarPage(
   tabPanel(
     h4("Heat Map"),
     fluidRow(
-      fluidRow(style = "border: 1px solid #E54B4B;",
+      fluidRow(
                div(
                  style = "text-align: center;",
                  column(12,
@@ -102,7 +102,7 @@ navbarPage(
                       leafletOutput('beijing_map')
                )
       ),
-      fluidRow(style = "border: 1px solid #E54B4B;",
+      fluidRow(
                column(6,
                       div(
                         selectizeInput(inputId = "heatmap_particulate_selection",
@@ -123,7 +123,7 @@ navbarPage(
                       )
                ),
       ),
-      fluidRow(style = "border: 1px solid #E54B4B;",
+      fluidRow(
                column(12,"datatable for the heatmap",
                       #create the datatable
                       DT::dataTableOutput('heatmap_dt')
@@ -134,8 +134,8 @@ navbarPage(
   
   tabPanel(
     h4("Station Comparison"),
-    fluidRow(style = "border: 1px solid #E54B4B;",
-             fluidRow(style = "border: 1px solid #E54B4B;",
+    fluidRow(
+             fluidRow(
                       column(5,offset = 1,
                              selectizeInput(inputId = "station_name1_line_graph",
                                             label = "First Station Name",

@@ -53,10 +53,7 @@ function(input, output, session) {
   
   color_scale_reactive = reactive({
 
-    if (nrow( heatmap_reactive_df()) == 0) {
-      return(NULL)  # Return NULL or some default value when the data is empty
-    }
-    print(heatmap_reactive_df()$mean_particle)
+    # print(heatmap_reactive_df()$mean_particle)
     
     color_scale_factor <- colorFactor(
       palette = c('green','red'),

@@ -1,15 +1,12 @@
 library(shiny)
 library(leaflet)
-library(maps)
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(DT)
-library(patchwork)
-library(openair)
-library(plotly)
-library(con2aqi)
 library(shinyWidgets)
+library(RSQLite)
+library(rsconnect)
 
 
 #data source
