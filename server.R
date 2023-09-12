@@ -39,6 +39,7 @@ function(input, output, session) {
     
     # Debug: Show the first few rows of the result
     # print(head(result))
+    result = result %>% arrange(desc(mean_particle))
     return(result)
   })
   
@@ -51,23 +52,33 @@ function(input, output, session) {
   })
   
   color_scale_reactive = reactive({
-    
+
     if (nrow( heatmap_reactive_df()) == 0) {
       return(NULL)  # Return NULL or some default value when the data is empty
     }
+    print(heatmap_reactive_df()$mean_particle)
     
-    color_scale <- colorFactor(
-      palette = c("green", "red"),
+    color_scale_factor <- colorFactor(
+      palette = c('green','red'),
       domain = heatmap_reactive_df()$mean_particle
     )
-  return(list(color_scale = color_scale))
+    
+    color_scale_factor_reversed <- colorFactor(
+      palette = c('green','red'),
+      domain = heatmap_reactive_df()$mean_particle,
+      reverse = TRUE
+    )
+
+  return(list(color_scale = color_scale_factor,
+              color_scale_reversed = color_scale_factor_reversed))
   })
   
   output$beijing_map = renderLeaflet({
     color_info = color_scale_reactive()
+    
     labels <- c("Low Value", "High Value")
     leaflet(heatmap_reactive_df()) %>%
-      addTiles() %>%
+      addProviderTiles('CartoDB.Positron') %>%
       setView(lng = 116.383331,lat = 40.1 ,zoom = 9) %>%
       addCircleMarkers(lat = ~lat,
                        lng = ~long,
@@ -77,15 +88,15 @@ function(input, output, session) {
                        popup = paste('Avg',input$heatmap_particulate_selection, 'conc. :',heatmap_reactive_df()$mean_particle  ,'<br>',
                                     'Total Particulates :', heatmap_reactive_df()$mean_total_particulate, '<br>',
                                     'Avg Particulate Percent :', heatmap_reactive_df()$mean_particulate_percentage
-                                    )
-                       # addLegend('bottomright',
-                       #           pal = ~color_info$color_scale,
-                       #           values = heatmap_reactive_df()$mean_particle,
-                       #           title = "Legend Title",
-                       #           labels = c("Lowest Concentration", "Highest Concentration")
-                       #           )
-                       
-                       )
+                                    ) 
+                       ) %>%
+      addLegend(position = 'bottomright',
+                pal = color_info$color_scale_reversed,
+                values = ~mean_particle,
+                labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE)),
+                title = "Mean Concentration",
+               
+      )
   })
   
   
