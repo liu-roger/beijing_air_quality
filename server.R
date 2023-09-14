@@ -38,7 +38,7 @@ function(input, output, session) {
                 )
     
     # Debug: Show the first few rows of the result
-    # print(head(result))
+    print(head(result))
     
     return(result)
   })
@@ -65,14 +65,28 @@ function(input, output, session) {
       domain = heatmap_reactive_df()$mean_particle,
       reverse = TRUE
     )
+    
+    color_scale_total_factor <- colorFactor(
+      palette = c('green','red'),
+      domain = heatmap_reactive_df()$mean_total_particulate
+    )
+    
+    color_scale_total_factor_reversed <- colorFactor(
+      palette = c('green','red'),
+      domain = heatmap_reactive_df()$mean_total_particulate,
+      reverse = TRUE
+    )
 
   return(list(color_scale = color_scale_factor,
-              color_scale_reversed = color_scale_factor_reversed))
+              color_scale_reversed = color_scale_factor_reversed,
+              color_scale_total_part = color_scale_total_factor,
+              color_scale_total_part_reversed = color_scale_total_factor_reversed))
   })
+  
+  
   
   output$beijing_map = renderLeaflet({
     color_info = color_scale_reactive()
-    
     labels <- c("Low Value", "High Value")
     leaflet(heatmap_reactive_df()) %>%
       addProviderTiles('CartoDB.Positron') %>%
@@ -94,6 +108,32 @@ function(input, output, session) {
                 labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE)),
                 title = "Mean Concentration",
                
+      )
+  })
+  
+  output$total_particulates_map = renderLeaflet({
+    color_info = color_scale_reactive()
+    labels <- c("Low Value", "High Value")
+    leaflet(heatmap_reactive_df()) %>%
+      addProviderTiles('CartoDB.Positron') %>%
+      setView(lng = 116.383331,lat = 40.1 ,zoom = 9) %>%
+      addCircleMarkers(lat = ~lat,
+                       lng = ~long,
+                       label = paste(heatmap_reactive_df()$station),
+                       color = ~color_info$color_scale_total_part(mean_total_particulate),  # Use color_scale
+                       opacity = 0.85,
+                       popup = paste(heatmap_reactive_df()$station,'<br>',
+                                     'Avg',input$heatmap_particulate_selection, 'conc. :',heatmap_reactive_df()$mean_particle  ,'<br>',
+                                     'Total Particulates :', heatmap_reactive_df()$mean_total_particulate, '<br>',
+                                     'Avg Particulate Percent :', heatmap_reactive_df()$mean_particulate_percentage
+                       ) 
+      ) %>%
+      addLegend(position = 'bottomright',
+                pal = color_info$color_scale_total_part_reversed,
+                values = ~mean_total_particulate,
+                labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE)),
+                title = "Total Particulate Concentration",
+                
       )
   })
   
@@ -402,5 +442,14 @@ function(input, output, session) {
   output$aggregate_dt_name  <- renderText({
     paste('Yearly Analysis of',as.character(input$aggregate_particulate_selection), 'for all stations from 2013 - 2017' )
   })
+  
+  output$mean_heatmap_title  <- renderText({
+    paste('Mean',as.character(input$heatmap_particulate_selection), 'Concentration on', input$heatmap_date_input )
+  })
+  
+  output$total_particulates_heatmap_title  <- renderText({
+    paste('Total Particulate Concentration on', input$heatmap_date_input )
+  })
+  
     
 }

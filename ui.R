@@ -15,6 +15,14 @@
 # Define UI for application that draws a histogram
 navbarPage(
   title = HTML("<img src='img/beijing_icon.jpeg' width='50' height='50'>"),
+  
+  tags$style(HTML("
+    .leaflet-control.legend {
+      font-size: 9px; 
+    }
+  ")),
+  
+  
   header = div(
     style = "text-align: center;", # Center the content horizontally
     h1("Beijing Air Quality Analysis"),
@@ -95,11 +103,20 @@ navbarPage(
                div(
                  style = "text-align: center;",
                  column(12,
-                        h4('Map of Beijing and Data Collection Stations'),
+                        h3('Map of Beijing and Data Collection Stations'),
                  ),
                ),
-               column(12,
+               column(6,
+                      div(style = "text-align: center;",
+                          verbatimTextOutput("mean_heatmap_title")
+                      ),
                       leafletOutput('beijing_map')
+               ),
+               column(6,
+                      div(style = "text-align: center;",
+                          verbatimTextOutput("total_particulates_heatmap_title")
+                      ),
+                      leafletOutput('total_particulates_map')
                )
       ),
       fluidRow(
