@@ -38,7 +38,7 @@ function(input, output, session) {
                 )
     
     # Debug: Show the first few rows of the result
-    print(head(result))
+    # print(head(result))
     
     return(result)
   })
