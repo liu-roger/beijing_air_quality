@@ -37,7 +37,7 @@ navbarPage(
       tabPanel('Aggregate Analysis',
                selectizeInput(inputId = "aggregate_particulate_selection",
                               label = "Particulate Selection",
-                              choices = colnames(all_stations)[c(10:19,21)]
+                              choices = colnames(all_stations)[c(10:19,21,24)]
                ),
                plotOutput('aggregate_particulate_analysis'),
                fluidRow(
@@ -50,7 +50,7 @@ navbarPage(
       tabPanel('Monthly and Yearly',
         selectizeInput(inputId = "monthly_particulate_selection",
           label = "Particulate Selection",
-          choices = colnames(all_stations)[c(10:19,21)]
+          choices = colnames(all_stations)[c(10:19,21,24)]
         ),
         
         selectizeInput(inputId = "year_selection_monthly_analysis",
@@ -78,7 +78,7 @@ navbarPage(
       tabPanel('Daily',
                selectizeInput(inputId = "daily_particulate_selection",
                               label = "Particulate Selection",
-                              choices = colnames(all_stations)[c(10:19,21)]
+                              choices = colnames(all_stations)[c(10:19,21,24)]
                ),
                dateInput('daily_date_input',
                          label = 'Date to Analyze: yyyy-mm-dd',
@@ -86,6 +86,8 @@ navbarPage(
                          min =  min(all_stations$date), max = max(all_stations$date)
                ),
                plotOutput('daily_particulate_analysis'),
+               
+               
                fluidRow(
                  column(12, verbatimTextOutput("daily_dt_name"),
                         DT::dataTableOutput('mean_daily_particulate')
@@ -166,7 +168,7 @@ navbarPage(
                              ),
                              selectizeInput(inputId = "line_graph_particulate_selection",
                                             label = "Particulate Selection",
-                                            choices = colnames(all_stations)[c(10:19,21)]
+                                            choices = colnames(all_stations)[c(10:19,21,24)]
                              ),
                       ),
                       column(5, offset = 1,
