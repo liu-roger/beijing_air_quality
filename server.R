@@ -37,7 +37,7 @@ function(input, output, session) {
                 )
     
     # Debug: Show the first few rows of the result
-    print(head(result))
+    # print(head(result))
     
     return(result)
   })
@@ -406,7 +406,7 @@ function(input, output, session) {
     result <- all_stations %>%
       filter((year == 2014) | (year == 2015) | (year == 2016)) %>%
       group_by(season, year) %>%
-      summarise(mean_aggregate = !!selected_col) 
+      reframe(mean_aggregate = !!selected_col) 
     
     # Debug: Show the first few rows of the result
     print(result)
