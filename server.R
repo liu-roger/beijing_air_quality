@@ -29,22 +29,21 @@ function(input, output, session) {
   
     result <- all_stations %>%
       filter(date == selected_date) %>%
-      select(station,date, selected_col,total_particulates, selected_col_percentage, long, lat) %>%
-      group_by(station,long,lat) %>%
+      select(station,date, selected_col,total_particulates, selected_col_percentage, long, lat, season) %>%
+      group_by(station,long,lat, season) %>%
       summarise(mean_particle = round(mean(!!selected_col, na.rm = TRUE),digits = 3),
                 mean_total_particulate = round(mean(total_particulates, na.rm = TRUE),digits = 3),
-                mean_particulate_percentage = round(mean(!!selected_col_percentage, na.rm = TRUE),digits = 3),
-                
+                mean_particulate_percentage = round(mean(!!selected_col_percentage, na.rm = TRUE),digits = 3)
                 )
     
     # Debug: Show the first few rows of the result
-    # print(head(result))
+    print(head(result))
     
     return(result)
   })
   
   output$heatmap_dt = DT::renderDataTable({
-    datatable(heatmap_reactive_df()[,c(1,4,5,6)],
+    datatable(heatmap_reactive_df()[,c(1,4,5,6,7)],
               options = list(
                 lengthMenu = c(12,24)
               )
@@ -113,7 +112,6 @@ function(input, output, session) {
   
   output$total_particulates_map = renderLeaflet({
     color_info = color_scale_reactive()
-    labels <- c("Low Value", "High Value")
     leaflet(heatmap_reactive_df()) %>%
       addProviderTiles('CartoDB.Positron') %>%
       setView(lng = 116.383331,lat = 40.1 ,zoom = 9) %>%
@@ -387,24 +385,43 @@ function(input, output, session) {
   
   output$aggregate_particulate_analysis = renderPlot(
     all_stations_reactive_aggregate() %>%
+      filter(year == 2014 | year == 2015 | year == 2016) %>%
       ggplot(aes(year, mean_aggregate)) + geom_line(aes(color=station)) + geom_point(aes(color=station)) +
-      labs(title = 'Analysis by Year', x = "Day of the Month", y = input$aggregate_particulate_selection) 
+      labs(title = 'Analysis by Year', x = "Year", y = input$aggregate_particulate_selection) +
+      scale_x_continuous(breaks = c(seq(2014, 2016, by = 1)))
     
   )
   
   output$aggregate_dt = DT::renderDataTable({
-    DT::datatable(all_stations_reactive_aggregate(),
+    DT::datatable(all_stations_reactive_aggregate() %>%
+                    filter(year == 2014 | year == 2015 | year == 2016),
                   options = list(
                     lengthMenu = c(12,24)
                     ))
   })
 # ______________________________________________________________________________________________________________________
-
   
-  
+  seasonal_analysis_reactive = reactive({
+    selected_col <- as.name(input$seasonal_particulate_selection) 
+    result <- all_stations %>%
+      filter((year == 2014) | (year == 2015) | (year == 2016)) %>%
+      group_by(season, year) %>%
+      summarise(mean_aggregate = !!selected_col) 
     
+    # Debug: Show the first few rows of the result
+    print(result)
+    return(result)
+  })
+  output$seasonal_analysis = renderPlot(
+    seasonal_analysis_reactive() %>%
+      ggplot(aes(x = season, y = mean_aggregate, fill = season))  + geom_boxplot() + facet_grid(vars(year)) +
+      labs(title = 'Seasonal Analysis by Year', x = "Season", y = input$aggregate_particulate_selection) 
+  )
   
   
+  
+# ______________________________________________________________________________________________________________________
+
   output$station_1_name_mean  <- renderText({
     paste("Station Name:", as.character(input$station_name1_line_graph), 'Daily Average',as.character(input$line_graph_particulate_selection))
   })

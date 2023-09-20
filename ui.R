@@ -37,7 +37,8 @@ navbarPage(
       tabPanel('Aggregate Analysis',
                selectizeInput(inputId = "aggregate_particulate_selection",
                               label = "Particulate Selection",
-                              choices = colnames(all_stations)[c(10:19,21,24)]
+                              choices = colnames(all_stations)[c(10:19,21,24)],
+                              selected = 'total_particulates'
                ),
                plotOutput('aggregate_particulate_analysis'),
                fluidRow(
@@ -50,17 +51,18 @@ navbarPage(
       tabPanel('Monthly and Yearly',
         selectizeInput(inputId = "monthly_particulate_selection",
           label = "Particulate Selection",
-          choices = colnames(all_stations)[c(10:19,21,24)]
+          choices = colnames(all_stations)[c(10:19,21,24)],
+          selected = 'total_particulates'
         ),
         
         selectizeInput(inputId = "year_selection_monthly_analysis",
           label = "Year to Analyze",
-          choices = unique(all_stations[4])
+          choices = c(2014,2015,2016)
         ),
         selectizeInput(inputId = "month_selection",
           label = "Month of Year to Analyze",
           choices = c('January','February','March','April','May','June','July','August','September','October','November','December'),
-          selected = 'March'
+          selected = 'January'
         ),
         
         plotOutput('yearly_particulate_analysis'),
@@ -78,7 +80,8 @@ navbarPage(
       tabPanel('Daily',
                selectizeInput(inputId = "daily_particulate_selection",
                               label = "Particulate Selection",
-                              choices = colnames(all_stations)[c(10:19,21,24)]
+                              choices = colnames(all_stations)[c(10:19,21,24)],
+                              selected = 'total_particulates'
                ),
                dateInput('daily_date_input',
                          label = 'Date to Analyze: yyyy-mm-dd',
@@ -94,6 +97,16 @@ navbarPage(
                  )
                )
       ),
+      tabPanel('Seasonal Analysis',
+               selectizeInput(inputId = "seasonal_particulate_selection",
+                              label = "Particulate Selection",
+                              choices = colnames(all_stations)[c(10:19,21,24)],
+                              selected = 'total_particulates'
+                              
+                              ),
+               plotOutput('seasonal_analysis',height = "1000px")
+      
+      )
       
     )
   ),
@@ -168,7 +181,8 @@ navbarPage(
                              ),
                              selectizeInput(inputId = "line_graph_particulate_selection",
                                             label = "Particulate Selection",
-                                            choices = colnames(all_stations)[c(10:19,21,24)]
+                                            choices = colnames(all_stations)[c(10:19,21,24)],
+                                            selected = 'total_particulates'
                              ),
                       ),
                       column(5, offset = 1,
