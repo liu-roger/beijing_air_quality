@@ -98,6 +98,7 @@ navbarPage(
                )
       ),
       tabPanel('Seasonal Analysis',
+               verbatimTextOutput("season_definition"),
                selectizeInput(inputId = "seasonal_particulate_selection",
                               label = "Particulate Selection",
                               choices = colnames(all_stations)[c(10:19,21,24)],
@@ -191,6 +192,8 @@ navbarPage(
                                             start = min(all_stations$date), end = max(all_stations$date),
                                             min =  min(all_stations$date), max = max(all_stations$date)
                              ),
+                
+                             
                              
                       )
              ),
@@ -228,7 +231,8 @@ navbarPage(
                         DT::dataTableOutput('station_2_dt_min')
                  )
                )
-      )
+      ),
+      
     )
   ),
   

@@ -256,7 +256,7 @@ function(input, output, session) {
   })
   
 # ______________________________________________________________________________________________________________________
-  
+
   all_stations_reactive_daily_mean = reactive({
     
     # Convert the input to a column name
@@ -415,9 +415,8 @@ function(input, output, session) {
   output$seasonal_analysis = renderPlot(
     seasonal_analysis_reactive() %>%
       ggplot(aes(x = season, y = mean_aggregate, fill = season))  + geom_boxplot() + facet_grid(vars(year)) +
-      labs(title = 'Seasonal Analysis by Year', x = "Season", y = input$aggregate_particulate_selection) 
+      labs(title = 'Seasonal Analysis by Year', x = "Season", y = input$seasonal_particulate_selection) 
   )
-  
   
   
 # ______________________________________________________________________________________________________________________
@@ -460,7 +459,7 @@ function(input, output, session) {
   })
   
   output$aggregate_dt_name  <- renderText({
-    paste('Yearly Analysis of',as.character(input$aggregate_particulate_selection), 'for all stations from 2013 - 2017' )
+    paste('Yearly Analysis of',as.character(input$aggregate_particulate_selection), 'for all stations from 2014 - 2016' )
   })
   
   output$mean_heatmap_title  <- renderText({
@@ -470,6 +469,13 @@ function(input, output, session) {
   output$total_particulates_heatmap_title  <- renderText({
     paste('Total Particulate Concentration on', input$heatmap_date_input )
   })
-  
+  output$season_definition  <- renderText({
+    paste('Fall: September, October, November
+Spring: March, April, May 
+Summer: June, July, August
+Winter: December, January, and February'
+
+    )
+  })
     
 }
